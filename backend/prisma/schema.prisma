@@ -1,0 +1,468 @@
+// ─────────────────────────────────────────────
+// Prisma Schema — EduTrack ERP
+// ─────────────────────────────────────────────
+// Run: npx prisma generate     → generate client
+// Run: npx prisma migrate dev  → apply migrations
+// Run: npx prisma studio       → open browser GUI
+// ─────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────
+
+/// Role hierarchy: OWNER > ADMIN > TEACHER
+enum Role {
+  OWNER     // Institute owner — full access
+  ADMIN     // Administrative staff — broad access
+  TEACHER   // Teaching staff — limited access
+}
+
+// ─────────────────────────────────────────────
+// User Model
+// ─────────────────────────────────────────────
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  phone     String?  @unique
+  password  String   // bcrypt hashed
+  role      Role     @default(TEACHER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("users")
+}
+
+// ─────────────────────────────────────────────
+// Student & Parent Models
+// ─────────────────────────────────────────────
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+  WITHDRAWN
+  ALUMNI
+}
+
+model Parent {
+  id             String    @id @default(cuid())
+  fatherName     String?
+  motherName     String?
+  phone          String
+  alternatePhone String?
+  email          String?
+  address        String?
+  occupation     String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  students       Student[]
+
+  @@map("parents")
+}
+
+model Student {
+  id            String        @id @default(cuid())
+  firstName     String
+  lastName      String
+  gender        String
+  dob           DateTime
+  grade         String
+  schoolName    String?
+  email         String?
+  phone         String
+  address       String?
+  city          String?
+  state         String?
+  bloodGroup    String?
+  photo         String?
+  status        StudentStatus @default(ACTIVE)
+  admissionDate DateTime      @default(now())
+  
+  parentId      String
+  parent        Parent        @relation(fields: [parentId], references: [id])
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  batches       StudentBatch[]
+  attendances   Attendance[]
+  fees          StudentFee[]
+  documents     Document[]
+
+  @@map("students")
+}
+
+// ─────────────────────────────────────────────
+// Teacher & Batch Models
+// ─────────────────────────────────────────────
+
+enum BatchStatus {
+  ACTIVE
+  UPCOMING
+  COMPLETED
+  CANCELLED
+}
+
+model Teacher {
+  id            String    @id @default(cuid())
+  name          String
+  email         String?   @unique
+  phone         String    @unique
+  qualification String?
+  subjects      String[]
+  joiningDate   DateTime  @default(now())
+  salaryType    String?
+  salaryAmount  Float?
+  photo         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  batches       Batch[]
+
+  @@map("teachers")
+}
+
+model Batch {
+  id          String        @id @default(cuid())
+  name        String
+  subject     String
+  grade       String
+  capacity    Int
+  roomNumber  String?
+  startTime   String
+  endTime     String
+  days        String[]
+  status      BatchStatus   @default(ACTIVE)
+  
+  teacherId   String
+  teacher     Teacher       @relation(fields: [teacherId], references: [id])
+  
+  students    StudentBatch[]
+  attendances Attendance[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("batches")
+}
+
+model StudentBatch {
+  studentId   String
+  batchId     String
+  enrolledAt  DateTime @default(now())
+
+  student     Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  batch       Batch    @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@id([studentId, batchId])
+  @@map("student_batches")
+}
+
+// ─────────────────────────────────────────────
+// Attendance Model
+// ─────────────────────────────────────────────
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  LEAVE
+}
+
+model Attendance {
+  id          String           @id @default(cuid())
+  studentId   String
+  batchId     String
+  date        DateTime         @db.Date
+  status      AttendanceStatus
+  remarks     String?
+  markedBy    String?          // The user ID of who marked it
+
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  batch       Batch            @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([batchId, studentId, date])
+  @@index([batchId, date])
+  @@index([studentId, date])
+  @@map("attendance")
+}
+
+// ─────────────────────────────────────────────
+// Fees & Payments
+// ─────────────────────────────────────────────
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  OVERDUE
+  PARTIAL
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  BANK_TRANSFER
+  CHEQUE
+}
+
+model FeePlan {
+  id           String        @id @default(cuid())
+  name         String
+  amount       Float
+  billingCycle String        // e.g. "MONTHLY", "YEARLY", "ONE_TIME"
+  dueDay       Int?          // Day of the month it's due
+  description  String?
+  
+  students     StudentFee[]
+  
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("fee_plans")
+}
+
+model StudentFee {
+  id          String        @id @default(cuid())
+  studentId   String
+  feePlanId   String
+  amount      Float
+  dueDate     DateTime
+  status      PaymentStatus @default(PENDING)
+  
+  student     Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  feePlan     FeePlan       @relation(fields: [feePlanId], references: [id])
+  payments    Payment[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("student_fees")
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  studentFeeId   String
+  amount         Float
+  paymentMethod  PaymentMethod
+  utrNumber      String?
+  receiptNumber  String        @unique
+  notes          String?
+  paidAt         DateTime      @default(now())
+  
+  studentFee     StudentFee    @relation(fields: [studentFeeId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime      @default(now())
+
+  @@map("payments")
+}
+
+// ─────────────────────────────────────────────
+// Communications & Notifications
+// ─────────────────────────────────────────────
+
+enum AnnouncementType {
+  GENERAL
+  EMERGENCY
+  EXAM
+  HOLIDAY
+  FEES
+}
+
+enum TargetAudience {
+  ALL
+  STUDENTS
+  TEACHERS
+  PARENTS
+  BATCH
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+}
+
+model Announcement {
+  id             String           @id @default(cuid())
+  title          String
+  message        String           @db.Text
+  type           AnnouncementType @default(GENERAL)
+  targetAudience TargetAudience   @default(ALL)
+  createdBy      String?
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@map("announcements")
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  title       String
+  message     String           @db.Text
+  recipientId String
+  isRead      Boolean          @default(false)
+  type        NotificationType @default(INFO)
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([recipientId])
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────────
+// WhatsApp Models
+// ─────────────────────────────────────────────
+
+enum WhatsAppStatus {
+  PENDING
+  SENT
+  FAILED
+  DELIVERED
+  READ
+}
+
+enum MessageType {
+  TRANSACTIONAL
+  PROMOTIONAL
+  OTP
+}
+
+model MessageTemplate {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  type      MessageType @default(TRANSACTIONAL)
+  content   String   @db.Text
+  variables String[] // e.g. ["name", "due_date", "amount"]
+  
+  logs      MessageLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("message_templates")
+}
+
+model MessageLog {
+  id         String         @id @default(cuid())
+  recipient  String         // Phone number
+  message    String         @db.Text
+  status     WhatsAppStatus @default(PENDING)
+  error      String?        @db.Text
+  sentAt     DateTime?
+  
+  templateId String?
+  template   MessageTemplate? @relation(fields: [templateId], references: [id])
+
+  createdAt  DateTime       @default(now())
+
+  @@map("message_logs")
+}
+
+// ─────────────────────────────────────────────
+// System Settings
+// ─────────────────────────────────────────────
+
+model InstituteSettings {
+  id             String   @id @default(cuid())
+  instituteName  String   @default("EduTrack ERP")
+  logo           String?
+  email          String?
+  phone          String?
+  alternatePhone String?
+  address        String?  @db.Text
+  city           String?
+  state          String?
+  pincode        String?
+  website        String?
+  timezone       String   @default("Asia/Kolkata")
+  currency       String   @default("INR")
+  academicYear   String   @default("2025-2026")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("institute_settings")
+}
+
+model AttendanceSettings {
+  id                          String   @id @default(cuid())
+  minimumAttendancePercentage Int      @default(75)
+  allowLateMarking            Boolean  @default(true)
+  autoAbsentAfterMinutes      Int      @default(30)
+  notifyLowAttendance         Boolean  @default(true)
+
+  @@map("attendance_settings")
+}
+
+model FeeSettings {
+  id                      String   @id @default(cuid())
+  defaultDueDay           Int      @default(5)
+  enablePartialPayments   Boolean  @default(true)
+  autoGenerateMonthlyFees Boolean  @default(false)
+  overduePenaltyEnabled   Boolean  @default(false)
+
+  @@map("fee_settings")
+}
+
+model NotificationSettings {
+  id                 String   @id @default(cuid())
+  emailNotifications Boolean  @default(true)
+  smsNotifications   Boolean  @default(false)
+  whatsappNotifications Boolean @default(false)
+  pushNotifications  Boolean  @default(true)
+  attendanceAlerts   Boolean  @default(true)
+  feeAlerts          Boolean  @default(true)
+
+  @@map("notification_settings")
+}
+
+// ─────────────────────────────────────────────
+// Document Management
+// ─────────────────────────────────────────────
+
+enum DocumentCategory {
+  STUDENT_ID
+  RECEIPT
+  MARKSHEET
+  PROFILE_PHOTO
+  CERTIFICATE
+  OTHER
+}
+
+model Document {
+  id          String           @id @default(cuid())
+  name        String
+  fileUrl     String           @db.Text
+  fileType    String           // Mime type, e.g., image/jpeg, application/pdf
+  publicId    String           // Cloudinary public ID for deletion
+  size        Int              // Size in bytes
+  uploadedBy  String           // User ID who uploaded
+  category    DocumentCategory @default(OTHER)
+  
+  studentId   String
+  student     Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime         @default(now())
+
+  @@index([studentId])
+  @@map("documents")
+}
+
+
