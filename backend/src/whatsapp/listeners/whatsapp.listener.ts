@@ -65,7 +65,7 @@ export class WhatsAppListener {
       const template = await this.templateService.getTemplateByName('ATTENDANCE_ABSENT');
       const message = this.templateService.formatMessage(template.content, {
         name: student.firstName,
-        batch: batch.name,
+        batch: batch?.name || 'Batch',
         date: new Date(date).toLocaleDateString(),
       });
 

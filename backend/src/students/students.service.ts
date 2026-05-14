@@ -16,7 +16,7 @@ export class StudentsService {
   async create(createStudentDto: CreateStudentDto) {
     const { parent, ...studentData } = createStudentDto;
 
-    return this.prisma.student.create({
+    const student = await this.prisma.student.create({
       data: {
         ...studentData,
         parent: {

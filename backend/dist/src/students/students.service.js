@@ -12,24 +12,27 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.StudentsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const event_emitter_1 = require("@nestjs/event-emitter");
+const events_constants_1 = require("../events/events.constants");
 let StudentsService = class StudentsService {
     prisma;
-    constructor(prisma) {
+    eventEmitter;
+    constructor(prisma, eventEmitter) {
         this.prisma = prisma;
+        this.eventEmitter = eventEmitter;
     }
     async create(createStudentDto) {
         const { parent, ...studentData } = createStudentDto;
-        return this.prisma.student.create({
+        const student = await this.prisma.student.create({
             data: {
                 ...studentData,
                 parent: {
                     create: parent,
                 },
             },
-            include: {
-                parent: true,
-            },
         });
+        this.eventEmitter.emit(events_constants_1.ERP_EVENTS.STUDENT.CREATED, { studentId: student.id });
+        return student;
     }
     async findAll(params) {
         const { skip = 0, take = 10, search, status, grade, sortBy, sortOrder } = params;
@@ -123,6 +126,7 @@ let StudentsService = class StudentsService {
 exports.StudentsService = StudentsService;
 exports.StudentsService = StudentsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        event_emitter_1.EventEmitter2])
 ], StudentsService);
 //# sourceMappingURL=students.service.js.map

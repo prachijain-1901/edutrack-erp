@@ -28,7 +28,7 @@ export class UploadsController {
   uploadStudentDocument(
     @Param('studentId') studentId: string,
     @Body('category') category: DocumentCategory,
-    @Request() req,
+    @Request() req: any,
     @UploadedFile(
       new ParseFilePipe({
         validators: [

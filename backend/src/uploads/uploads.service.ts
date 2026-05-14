@@ -14,7 +14,7 @@ export class UploadsService {
         { folder, resource_type: 'auto' },
         (error, result) => {
           if (error) return reject(error);
-          resolve(result);
+          resolve(result as any);
         },
       );
       streamifier.createReadStream(file.buffer).pipe(uploadStream);

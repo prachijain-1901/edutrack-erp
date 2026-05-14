@@ -13,7 +13,7 @@ export class AnnouncementsController {
 
   @Post()
   @Roles(Role.OWNER, Role.ADMIN, Role.TEACHER)
-  create(@Body() createAnnouncementDto: CreateAnnouncementDto, @Request() req) {
+  create(@Body() createAnnouncementDto: CreateAnnouncementDto, @Request() req: any) {
     return this.announcementsService.create(createAnnouncementDto, req.user.id);
   }
 

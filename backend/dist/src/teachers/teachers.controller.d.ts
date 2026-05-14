@@ -10,12 +10,12 @@ export declare class TeachersController {
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        photo: string | null;
         qualification: string | null;
         subjects: string[];
         joiningDate: Date;
         salaryType: string | null;
         salaryAmount: number | null;
+        photo: string | null;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     findAll(skip?: string, take?: string, search?: string): Promise<{
         data: ({
@@ -29,12 +29,12 @@ export declare class TeachersController {
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            photo: string | null;
             qualification: string | null;
             subjects: string[];
             joiningDate: Date;
             salaryType: string | null;
             salaryAmount: number | null;
+            photo: string | null;
         })[];
         meta: {
             total: number;
@@ -49,14 +49,14 @@ export declare class TeachersController {
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            days: string[];
-            grade: string;
-            status: import("@prisma/client").$Enums.BatchStatus;
             subject: string;
+            grade: string;
             capacity: number;
             roomNumber: string | null;
             startTime: string;
             endTime: string;
+            days: string[];
+            status: import("@prisma/client").$Enums.BatchStatus;
             teacherId: string;
         }[];
     } & {
@@ -66,12 +66,12 @@ export declare class TeachersController {
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        photo: string | null;
         qualification: string | null;
         subjects: string[];
         joiningDate: Date;
         salaryType: string | null;
         salaryAmount: number | null;
+        photo: string | null;
     }>;
     update(id: string, updateTeacherDto: UpdateTeacherDto): Promise<{
         id: string;
@@ -80,12 +80,12 @@ export declare class TeachersController {
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        photo: string | null;
         qualification: string | null;
         subjects: string[];
         joiningDate: Date;
         salaryType: string | null;
         salaryAmount: number | null;
+        photo: string | null;
     }>;
     remove(id: string): Promise<{
         id: string;
@@ -94,11 +94,11 @@ export declare class TeachersController {
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        photo: string | null;
         qualification: string | null;
         subjects: string[];
         joiningDate: Date;
         salaryType: string | null;
         salaryAmount: number | null;
+        photo: string | null;
     }>;
 }

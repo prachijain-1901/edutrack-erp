@@ -95,7 +95,7 @@ export class WhatsAppService {
       await this.sendMessage({
         recipient: log.recipient,
         message: log.message,
-        templateId: log.templateId,
+        templateId: log.templateId || undefined,
       });
       
       // Delete the old failed log or update it

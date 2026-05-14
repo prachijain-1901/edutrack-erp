@@ -8,12 +8,12 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
-  findAll(@Request() req) {
+  findAll(@Request() req: any) {
     return this.notificationsService.findAllForUser(req.user.id);
   }
 
   @Patch('read-all')
-  markAllAsRead(@Request() req) {
+  markAllAsRead(@Request() req: any) {
     return this.notificationsService.markAllAsRead(req.user.id);
   }
 

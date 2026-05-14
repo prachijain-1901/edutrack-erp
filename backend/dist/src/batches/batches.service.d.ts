@@ -12,26 +12,26 @@ export declare class BatchesService {
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            photo: string | null;
             qualification: string | null;
             subjects: string[];
             joiningDate: Date;
             salaryType: string | null;
             salaryAmount: number | null;
+            photo: string | null;
         };
     } & {
         id: string;
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        days: string[];
-        grade: string;
-        status: import("@prisma/client").$Enums.BatchStatus;
         subject: string;
+        grade: string;
         capacity: number;
         roomNumber: string | null;
         startTime: string;
         endTime: string;
+        days: string[];
+        status: import("@prisma/client").$Enums.BatchStatus;
         teacherId: string;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, Prisma.PrismaClientOptions>;
     findAll(params: {
@@ -49,12 +49,12 @@ export declare class BatchesService {
                 name: string;
                 createdAt: Date;
                 updatedAt: Date;
-                photo: string | null;
                 qualification: string | null;
                 subjects: string[];
                 joiningDate: Date;
                 salaryType: string | null;
                 salaryAmount: number | null;
+                photo: string | null;
             };
             _count: {
                 students: number;
@@ -64,14 +64,14 @@ export declare class BatchesService {
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            days: string[];
-            grade: string;
-            status: import("@prisma/client").$Enums.BatchStatus;
             subject: string;
+            grade: string;
             capacity: number;
             roomNumber: string | null;
             startTime: string;
             endTime: string;
+            days: string[];
+            status: import("@prisma/client").$Enums.BatchStatus;
             teacherId: string;
         })[];
         meta: {
@@ -89,12 +89,12 @@ export declare class BatchesService {
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            photo: string | null;
             qualification: string | null;
             subjects: string[];
             joiningDate: Date;
             salaryType: string | null;
             salaryAmount: number | null;
+            photo: string | null;
         };
         students: ({
             student: {
@@ -104,38 +104,38 @@ export declare class BatchesService {
                 createdAt: Date;
                 updatedAt: Date;
                 address: string | null;
+                city: string | null;
+                state: string | null;
+                photo: string | null;
+                grade: string;
+                status: import("@prisma/client").$Enums.StudentStatus;
                 firstName: string;
                 lastName: string;
                 gender: string;
                 dob: Date;
-                grade: string;
                 schoolName: string | null;
-                city: string | null;
-                state: string | null;
                 bloodGroup: string | null;
-                status: import("@prisma/client").$Enums.StudentStatus;
-                photo: string | null;
                 admissionDate: Date;
                 parentId: string;
             };
         } & {
+            enrolledAt: Date;
             studentId: string;
             batchId: string;
-            enrolledAt: Date;
         })[];
     } & {
         id: string;
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        days: string[];
-        grade: string;
-        status: import("@prisma/client").$Enums.BatchStatus;
         subject: string;
+        grade: string;
         capacity: number;
         roomNumber: string | null;
         startTime: string;
         endTime: string;
+        days: string[];
+        status: import("@prisma/client").$Enums.BatchStatus;
         teacherId: string;
     }>;
     update(id: string, updateBatchDto: UpdateBatchDto): Promise<{
@@ -146,26 +146,26 @@ export declare class BatchesService {
             name: string;
             createdAt: Date;
             updatedAt: Date;
-            photo: string | null;
             qualification: string | null;
             subjects: string[];
             joiningDate: Date;
             salaryType: string | null;
             salaryAmount: number | null;
+            photo: string | null;
         };
     } & {
         id: string;
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        days: string[];
-        grade: string;
-        status: import("@prisma/client").$Enums.BatchStatus;
         subject: string;
+        grade: string;
         capacity: number;
         roomNumber: string | null;
         startTime: string;
         endTime: string;
+        days: string[];
+        status: import("@prisma/client").$Enums.BatchStatus;
         teacherId: string;
     }>;
     remove(id: string): Promise<{
@@ -173,24 +173,24 @@ export declare class BatchesService {
         name: string;
         createdAt: Date;
         updatedAt: Date;
-        days: string[];
-        grade: string;
-        status: import("@prisma/client").$Enums.BatchStatus;
         subject: string;
+        grade: string;
         capacity: number;
         roomNumber: string | null;
         startTime: string;
         endTime: string;
+        days: string[];
+        status: import("@prisma/client").$Enums.BatchStatus;
         teacherId: string;
     }>;
     assignStudent(batchId: string, studentId: string): Promise<{
+        enrolledAt: Date;
         studentId: string;
         batchId: string;
-        enrolledAt: Date;
     }>;
     removeStudent(batchId: string, studentId: string): Promise<{
+        enrolledAt: Date;
         studentId: string;
         batchId: string;
-        enrolledAt: Date;
     }>;
 }
